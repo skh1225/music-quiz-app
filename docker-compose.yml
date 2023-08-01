@@ -33,7 +33,14 @@ services:
       - POSTGRES_USER=devuser
       - POSTGRES_PASSWORD=changeme
 
+  redis:
+    image: redis:7
+    command: redis-server --requirepass changeme
+    volumes:
+      - dev-cache-data:/data
+
 volumes:
   dev-db-data:
+  dev-cache-data:
   dev-static-data:
 
