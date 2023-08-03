@@ -71,13 +71,9 @@ export default {
           this.sHint = this.singer;
         }
         if ( value>=this.tTm && Math.floor((value-this.tTm)/this.tItv) <= this.titleLength && value%this.tItv === 0) {
-          this.tHint = this.titleHint.slice(0,Math.floor((value-this.tTm)/this.tItv))
-          let last = Math.floor((value-this.tTm)/this.tItv);
-          if (this.titleHint[last] === ' ') {
-            this.tHint += ' ';
-            last += 1;
-          }
-          for (const c of this.titleHint.slice(last,this.titleLength)) {
+          this.tHint = this.titleHint.slice(0, Math.floor((value-this.tTm)/this.tItv))
+          const last = Math.floor((value-this.tTm)/this.tItv);
+          for (const c of this.titleHint.slice(last,this.titleLength).split(' ')) {
             this.tHint += '＿'.repeat(c.length) + ' ';
           }
           this.tHint.trim();
@@ -92,7 +88,7 @@ export default {
       this.imgsrc = '';
       this.titleLength = value['title'].length;
       for ( const i in value['title'] ) {
-        let code = value['title'].charCodeAt(i);
+        const code = value['title'].charCodeAt(i);
         if (code>44031 && code<55204) {
           this.titleHint += this.cho[Math.floor((+code-44032)/588)];
         } else if(code>47 && code<58) {

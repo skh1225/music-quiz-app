@@ -167,20 +167,12 @@ export default {
   actions: {
     async accessRoom(context, payload) {
       try {
-        let response;
-
-        if (payload['mode'] === 'access') {
-          const apiUrl = context.getters.apiUrl + `${payload['name']}/`;
-          response = await axios.get(apiUrl, {
-            params: { password: payload['password'] },
-            headers: context.rootGetters['headers']
-          });
-        } else {
-          const apiUrl = context.getters.apiUrl;
-          response = await axios.post(apiUrl,
-            { name: payload['name'], password: payload['password'], music_length: payload['length'] },
-            { headers: context.rootGetters['headers'] });
-        }
+        const response = payload['mode'] === 'access'? await axios.get(context.getters.apiUrl + `${payload['name']}/`, {
+          params: { password: payload['password'] },
+          headers: context.rootGetters['headers']
+        }):await axios.post(context.getters.apiUrl,
+          { name: payload['name'], password: payload['password'], music_length: payload['length'] },
+          { headers: context.rootGetters['headers'] });
 
         context.commit('setRoomInfo', {
           roomName: response.data['name'],
