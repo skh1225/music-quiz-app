@@ -3,6 +3,9 @@ from rest_framework.authtoken.models import Token
 from channels.db import database_sync_to_async
 from channels.middleware import BaseMiddleware
 
+import logging
+import os
+
 
 @database_sync_to_async
 def get_user(token_key):

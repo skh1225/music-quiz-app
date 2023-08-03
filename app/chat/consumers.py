@@ -1,5 +1,6 @@
 # chat/consumers.py
 import json
+import asyncio
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django_redis import get_redis_connection
@@ -146,7 +147,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                   self.conn.hset(self.room_group_name+'_info', 'state', 1)
                   self.conn.zincrby(self.room_group_name+'_score', 1, self.scope['user'].id)
                   await self.channel_layer.group_send(
-                      self.room_group_name, {"type": "correct_message", "action": "correct", "user_name": self.scope['user'].name}
+                      self.room_group_name, {"type": "action_message", "action": "correct", "user_name": self.scope['user'].name}
                   )
                   await self.channel_layer.group_send(
                             self.room_group_name, {"type": "score_message"}
@@ -173,19 +174,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             self.room_group_name, {"type": "ready_message", "ready": ready_num, "total": total_num}
                         )
                 else:
+                    delay = False
                     if total_num//2+1 == ready_num:
+                        if not int(self.conn.hget(self.room_group_name+'_info','state')):
+                            self.conn.hset(self.room_group_name+'_info', 'state', 1)
+                            await self.channel_layer.group_send(
+                                self.room_group_name, {"type": "action_message", "action": "showAnswer"}
+                            )
+                            delay = True
                         if i == 50-1:
                             self.conn.delete(self.room_group_name+'_ready')
                             self.conn.hset(self.room_group_name+'_info', 'state', 0)
                             await self.channel_layer.group_send(
-                                self.room_group_name, {"type": "action_message", "action": "end", "round": i+1}
+                                self.room_group_name, {"type": "action_message", "action": "end", "round": i+1, "delay": delay}
                             )
                             self.conn.hincrby(self.room_group_name+'_info', 'round', 1)
                         else:
                             self.conn.delete(self.room_group_name+'_ready')
                             self.conn.hset(self.room_group_name+'_info', 'state', 0)
                             await self.channel_layer.group_send(
-                              self.room_group_name, {"type": "action_message", "action": "skip", "round": i+1}
+                              self.room_group_name, {"type": "action_message", "action": "skip", "round": i+1, "delay": delay}
                             )
                             self.conn.hincrby(self.room_group_name+'_info', 'round', 1)
                     else:
@@ -200,17 +208,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Send message to WebSocket
         await self.send(text_data=json.dumps({"message": message, "user_name": user_name}))
 
-    async def correct_message(self, event):
-        action = event["action"]
-        user_name = event["user_name"]
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({"action": action, "user_name": user_name}))
-
     async def action_message(self, event):
-        action = event["action"]
-        rnd = event["round"]
+        data = { "action": event["action"] }
+        if "user_name" in event:
+          data["user_name"] = event["user_name"]
+        if "round" in event:
+          data["round"] = event["round"]
+        if "delay" in event and event["delay"]:
+          await asyncio.sleep(5.0)
         # Send message to WebSocket
-        await self.send(text_data=json.dumps({"action": action, "round": rnd}))
+        await self.send(text_data=json.dumps(data))
 
     async def ready_message(self, event):
         ready = event["ready"]
@@ -234,36 +241,3 @@ class ChatConsumer(AsyncWebsocketConsumer):
             user_scores += str(int(score))+','
         user_names = await get_user_names(user_ids)
         await self.send(text_data=json.dumps({"score": user_scores, "user_names": user_names}))
-
-
-
-# Redis
-
-# hash
-# room_info {
-#   total: int,
-#   round: int,
-#   isUnderWay: bool,
-#   state: bool,
-# }
-
-# list
-# room_titles
-
-# set
-# room_ready
-
-# 'name': 'message'
-# 1. send
-# 2. round != 0 && !state => room_titles[round] == message? => !state => send
-
-
-# 'userId': 'action'
-# skip:
-# 1. isUnderWay => len(room_ready) > room_info.total//2+1 => round++
-#   1) round > 50 => isUnderWay = false => send(game end)
-#   2) else => send(round)
-# 2. else => len(room_ready) >= room_info.total => send(++round)
-
-# state = false
-# room_ready = clear

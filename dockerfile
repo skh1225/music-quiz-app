@@ -7,13 +7,14 @@ COPY ./requirements.txt /tmp/requirements.txt
 COPY ./requirements.dev.txt /tmp/requirements.dev.txt
 COPY ./scripts /scripts
 COPY ./app /app
+COPY ./supervisord.conf /etc/supervisord.conf
 WORKDIR /app
 EXPOSE 8000
 
 ARG DEV=false
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
-    apk add --update --no-cache postgresql-client ffmpeg && \
+    apk add --update --no-cache postgresql-client ffmpeg supervisor && \
     apk add --update --no-cache --virtual .tmp-build-deps \
         build-base postgresql-dev musl-dev linux-headers libffi-dev && \
     /py/bin/pip install -r /tmp/requirements.txt && \
@@ -28,6 +29,8 @@ RUN python -m venv /py && \
         django-user && \
     mkdir -p /vol/web/media && \
     mkdir -p /vol/web/static && \
+    mkdir -p /app/logs && \
+    chmod -R 777 /app/logs && \
     chown -R django-user:django-user /vol && \
     chmod -R 755 /vol && \
     chmod -R +x /scripts
