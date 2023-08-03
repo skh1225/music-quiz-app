@@ -6,6 +6,7 @@
           <li v-for="score in scores" :key="score">{{ score }}</li>
         </ul>
         <p class="bottom">{{ readyTotal }}</p>
+        <p class="progress">{{ progress }}</p>
       </div>
       <div class="hint">
         <p>{{ dHint }}</p>
@@ -15,14 +16,14 @@
       </div>
     </div>
     <div>
-      <transition name="music">
-        <img :src="imgsrc" v-if="isCorrect">
+      <transition name="thumnail">
+        <img :src="imgsrc" v-if="showAnswer">
       </transition>
       <textarea readonly ref="chatRecord" @input="resize" :value="textValue"></textarea>
     </div>
     <div>
       <input type="text" @keypress.enter="submit" v-model.trim="enteredInput"/>
-      <button @click="submit">Submit</button>
+      <button @click="submit">Send</button>
       <button @click="skip">Skip</button>
     </div>
   </section>
@@ -46,7 +47,12 @@ export default {
       singer: '',
       description: '',
       imgsrc: '',
+      confetti: new JSConfetti(),
       cho: ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"],
+      dTm: 20,
+      sTm: 40,
+      tTm: 70,
+      tItv: 15,
     };
   },
   watch: {
@@ -57,22 +63,22 @@ export default {
       }
     },
     timer(value) {
-      if (!this.isCorrect) {
-        if (value === 30) {
+      if (!this.showAnswer) {
+        if (value === this.dTm) {
         this.dHint = this.description;
         }
-        if (value === 60) {
+        if (value === this.sTm) {
           this.sHint = this.singer;
         }
-        if ( value>=90 && Math.floor((value-90)/10) <= this.titleLength && value%10 === 0) {
-          this.tHint = this.titleHint.slice(0,Math.floor((value-90)/10))
-          let last = Math.floor((value-90)/10);
+        if ( value>=this.tTm && Math.floor((value-this.tTm)/this.tItv) <= this.titleLength && value%this.tItv === 0) {
+          this.tHint = this.titleHint.slice(0,Math.floor((value-this.tTm)/this.tItv))
+          let last = Math.floor((value-this.tTm)/this.tItv);
           if (this.titleHint[last] === ' ') {
             this.tHint += ' ';
             last += 1;
           }
           for (const c of this.titleHint.slice(last,this.titleLength)) {
-            this.tHint += '_'.repeat(c.length)+' ';
+            this.tHint += '＿'.repeat(c.length) + ' ';
           }
           this.tHint.trim();
         }
@@ -99,16 +105,17 @@ export default {
           this.titleHint += '*';
         }
       }
-      const resizedImage = value['image'].split('=');
-      resizedImage.pop();
-      this.imgsrc = resizedImage.join('=')+'=w544-h544-l90-rj'
+      this.imgsrc = value['image']
       this.singer = value['singer'];
       this.description = value['description'];
     },
     isCorrect(value) {
       if (value) {
-        const confetti = new JSConfetti();
-        confetti.addConfetti();
+        this.confetti.addConfetti();
+      }
+    },
+    showAnswer(value) {
+      if (value) {
         this.tHint = this.currSongInfo['title'];
         this.sHint = this.currSongInfo['singer'];
         this.dHint = this.currSongInfo['description'];
@@ -116,8 +123,14 @@ export default {
     }
   },
   computed: {
+    progress() {
+      return 'ROUND ' + this.$store.getters['room/getProgress'];
+    },
     isCorrect() {
       return this.$store.getters['room/getCorrect'];
+    },
+    showAnswer() {
+      return this.$store.getters['room/getShowAnswer'];
     },
     currSongInfo() {
       return this.$store.getters['room/getCurrSongInfo'];
@@ -171,8 +184,9 @@ export default {
     console.log('before-unmount')
     this.unmount = true;
     clearInterval(this.reconnectInterval)
+    this.$store.commit('room/clearCron')
     this.$store.commit('room/initData')
-    this.$router.replace('/home');
+    // this.$router.replace('/home');
   },
   mounted() {
     this.reconnectInterval = setInterval(() => {
@@ -187,17 +201,15 @@ export default {
 
 <style scoped>
 
-.music-enter-from {
+.thumnail-enter-from {
   opacity: 0;
-  transform: translateY(-30px);
 }
 
-.music-enter-active {
-  transition: all 5s ease-in;
+.thumnail-enter-active {
+  transition: all 3s ease-in;
 }
-.music-enter-to {
+.thumnail-enter-to {
   opacity: 0.3;
-  transform: translateY(0);
 }
 
 section {
@@ -214,6 +226,7 @@ div {
   margin: 0;
   border: solid 1px white;
   height: 200px;
+  max-width: 50%;
   width: 320px;
 }
 .hint {
@@ -222,10 +235,21 @@ div {
   margin: 0;
   border: solid 1px white;
   height: 200px;
+  max-width: 50%;
   width: 320px;
 }
+textarea {
+  max-width: 100%;
+  width: 640px;
+  height: 360px;
+  border: solid 1px white;
+  color: white;
+  opacity: 1;
+  overflow: hidden;
+  background-color: rgb(0,0,0,0);
+}
 .thint {
-  letter-spacing: 5px;
+  letter-spacing: 2px;
 }
 img {
   display: inline-block;
@@ -241,7 +265,6 @@ img {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  margin: 0;
 }
 
 .bottom {
@@ -250,12 +273,20 @@ img {
   margin-left: 10px;
 }
 
+.progress {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-right: 10px;
+}
+
 input {
-  width: 500px;
+  max-width: 500px;
+  width: 70%;
   height: 32px;
   border: solid 1px white;
   outline: none;
-  padding-left: 10px;
+  padding-left: 5px;
   color: white;
   background-color:rgb(0,0,0,0);
 }
@@ -263,19 +294,11 @@ input {
 button {
   background-color: rgb(0,0,0,0);
   border: solid 1px white;
+  max-width: 60px;
+  width: 12%;
   height: 32px;
   margin-left: 10px;
   color: white;
-}
-
-textarea {
-  width: 640px;
-  height: 360px;
-  border: solid 1px white;
-  color: white;
-  opacity: 1;
-  overflow: hidden;
-  background-color: rgb(0,0,0,0);
 }
 
 ul {

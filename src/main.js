@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import axios from 'axios';
 
 import store from './store/index.js';
 import router from './router.js';
@@ -17,3 +18,14 @@ app.use(router);
 app.use(store);
 
 app.mount('#app');
+
+function getCSRFToken() {
+  const cookieValue = document.cookie
+    .split('; ')
+    .find((cookie) => cookie.startsWith('csrftoken='))
+    .split('=')[1];
+
+  return cookieValue;
+}
+
+axios.defaults.headers.common['X-CSRFToken'] = getCSRFToken();

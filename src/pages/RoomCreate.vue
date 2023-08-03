@@ -10,6 +10,10 @@
         <label for="password">Password</label>
         <input id="password" type="password" v-model.trim="password"/>
       </div>
+      <div class="form-control">
+        <label for="round">Round(max100)</label>
+        <input id="round" type="number" v-model.trim="round"/>
+      </div>
       <base-button>Create</base-button>
     </form>
   </div>
@@ -21,6 +25,7 @@ export default {
     return {
       roomName: '',
       password: '',
+      round: 50,
       error: null,
     }
   },
@@ -31,6 +36,7 @@ export default {
         await this.$store.dispatch('room/accessRoom',{
         name: this.roomName,
         password: this.password,
+        length: this.round,
         mode: 'create',
       })
       } catch(error) {

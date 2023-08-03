@@ -1,62 +1,32 @@
 import axios from 'axios';
 
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+
 export default {
   namespaced: true,
   state() {
     return {
-      cron: null,
-      timer: 0,
-      currSongIndex: -1,
-      currAudio: null,
-      chatSocket: null,
       roomName: '',
       password: '',
+      correct: false,
+      showAnswer: false,
+      cron: null,
+      currAudio: null,
+      chatSocket: null,
+      timer: 0,
+      currSongIndex: -1,
+      musicLength: 0,
+      roomReadyNum: 0,
+      roomTotalNum: null,
+      score: null,
       playList: [],
       textRecord: [],
-      correct: false,
-      roomTotalNum: null,
-      roomReadyNum: 0,
-      score: null,
     };
   },
   getters: {
-    getCurrSongInfo(state) {
-      if (state.currSongIndex >= 0 && state.currSongIndex < state.playList.length) {
-        return {
-          title: state.playList[state.currSongIndex]['title'],
-          singer: state.playList[state.currSongIndex]['singers'][0]['name'],
-          description: state.playList[state.currSongIndex]['description'],
-          image: state.playList[state.currSongIndex]['image'],
-        }
-      }
-      return null;
-    },
-    getTimer(state) {
-      return state.timer;
-    },
-    getScore(state) {
-      return state.score;
-    },
-    getReadyTotal(state) {
-      return 'SKIP ' + state.roomReadyNum + ' / ' + state.roomTotalNum;
-    },
-    apiUrl(_, _2 ,_3 ,rootGetters) {
-      return 'http://' + rootGetters.url + '/api/music/rooms/'
-    },
-    musicUrl(_, _2, _3, rootGetters) {
-      return 'http://' + rootGetters.url + '/api/music/musics/'
-    },
-    socketUrl(state, _2, _3, rootGetters) {
-      return 'ws://' + rootGetters.url + `/ws/chat/${state.roomName}/?token=${rootGetters.token}`
-    },
-    getSocket(state) {
-      return state.chatSocket;
-    },
-    getSocketReadyState(state) {
-      if (state.chatSocket) {
-        return state.chatSocket.readyState;
-      }
-      return null;
+    getProgress(state) {
+      return state.currSongIndex+1+' / '+state.musicLength;
     },
     getTextRecord(state) {
       return state.textRecord;
@@ -72,50 +42,58 @@ export default {
     },
     getCorrect(state) {
       return state.correct;
-    }
+    },
+    getShowAnswer(state) {
+      return state.showAnswer;
+    },
+    getTimer(state) {
+      return state.timer;
+    },
+    getScore(state) {
+      return state.score;
+    },
+    getReadyTotal(state) {
+      return 'SKIP ' + state.roomReadyNum + ' / ' + state.roomTotalNum;
+    },
+    getSocket(state) {
+      return state.chatSocket;
+    },
+    apiUrl(_, _2 ,_3 ,rootGetters) {
+      return 'http://' + rootGetters.url + '/api/music/rooms/'
+    },
+    musicUrl(_, _2, _3, rootGetters) {
+      return 'http://' + rootGetters.url + '/api/music/musics/'
+    },
+    socketUrl(state, _2, _3, rootGetters) {
+      return 'ws://' + rootGetters.url + `/ws/chat/${state.roomName}/?token=${rootGetters.token}`
+    },
+    getSocketReadyState(state) {
+      if (state.chatSocket) {
+        return state.chatSocket.readyState;
+      }
+      return null;
+    },
+    getCurrSongInfo(state) {
+      if (state.currSongIndex >= 0 && state.currSongIndex < state.playList.length) {
+        return {
+          title: state.playList[state.currSongIndex]['title'],
+          singer: state.playList[state.currSongIndex]['singers'][0]['name'],
+          description: state.playList[state.currSongIndex]['description'],
+          image: state.playList[state.currSongIndex]['image'],
+        }
+      }
+      return null;
+    },
   },
   mutations: {
     setCorrect(state, payload) {
       state.correct = payload['correct'];
     },
-    clearCron(state) {
-      clearInterval(state.cron);
-      state.timer=0;
+    setShowAnswer(state, payload) {
+      state.showAnswer = payload['showAnswer'];
     },
-    initData(state) {
-      if (state.cron) {
-        clearInterval(state.cron)
-      }
-      if (state.currAudio) {
-        state.currAudio.pause()
-      }
-      if (state.chatSocket && state.chatSocket.readyState !== 3) {
-        state.chatSocket.close()
-      }
-      state.cron= null;
-      state.timer= 0;
-      state.currSongIndex= -1;
-      state.currAudio= null;
-      state.chatSocket= null;
-      state.roomName= '';
-      state.password= '';
-      state.playList= [];
-      state.textRecord= [];
-      state.correct= false;
-      state.roomTotalNum= null;
-      state.roomReadyNum= 0;
-      state.score= null;
-    },
-    setRoomInfo(state, payload) {
-      // state.chatSocket = payload['chatSocket'];
-      state.roomName = payload['roomName'];
-      state.password = payload['password'];
-    },
-    appendText(state, payload) {
-      if (state.textRecord.length > 22) {
-        state.textRecord.shift();
-      }
-      state.textRecord.push(payload['message']);
+    setScore(state, payload) {
+      state.score = payload['score'];
     },
     setSocket(state, payload) {
       state.chatSocket = new WebSocket(payload['url']);
@@ -123,50 +101,11 @@ export default {
     setPlayList(state, payload) {
       state.playList = payload['playList'];
     },
-    startGame(state, payload) {
-      state.currSongIndex = +payload['round'];
-      state.correct = false;
-      state.currAudio = new Audio(state.playList[state.currSongIndex]['audio']);
-      console.log(state.playList[state.currSongIndex])
-      console.log(state.currSongIndex)
-      console.log(state.playList.length)
-      state.currAudio.addEventListener('ended', () => {
-        state.chatSocket.send(JSON.stringify({
-          'action': 'skip'
-        }))
-      });
-      state.cron = setInterval(() => {
-        state.timer++;
-       }, 1000)
-      state.currAudio.play()
-    },
-    skipGame(state, payload) {
-      state.currSongIndex = +payload['round'];
-      if (state.currAudio !== null) {
-        clearInterval(state.cron);
-        state.correct = false;
-        state.timer = 0;
-        state.currAudio.pause();
-      }
-      state.currAudio = new Audio(state.playList[state.currSongIndex]['audio']);
-      state.currAudio.addEventListener('ended', () => {
-        state.chatSocket.send(JSON.stringify({
-          'action': 'skip'
-        }))
-      });
-      state.cron = setInterval(() => {
-        state.timer++;
-       }, 1000)
-      state.currAudio.play()
-    },
-    endGame(state, payload) {
-      state.currSongIndex = +payload['round'];
-      if (state.currAudio !== null) {
-        clearInterval(state.cron);
-        state.correct = false;
-        state.timer = 0;
-        state.currAudio.pause();
-      }
+    setRoomInfo(state, payload) {
+      // state.chatSocket = payload['chatSocket'];
+      state.roomName = payload['roomName'];
+      state.password = payload['password'];
+      state.musicLength = payload['length'];
     },
     setNum(state, payload) {
       if ('ready' in payload) {
@@ -176,9 +115,54 @@ export default {
         state.roomTotalNum = payload['total'];
       }
     },
-    setScore(state, payload) {
-      state.score = payload['score'];
-    }
+    appendText(state, payload) {
+      if (state.textRecord.length > 22) {
+        state.textRecord.shift();
+      }
+      state.textRecord.push(payload['message']);
+    },
+    setRound(state, payload) {
+      state.currSongIndex = +payload['round'];
+    },
+    clearCron(state) {
+      if (state.currAudio !== null) {
+        clearInterval(state.cron);
+        state.correct = false;
+        state.showAnswer = false;
+        state.timer = 0;
+        state.currAudio.pause();
+      }
+    },
+    setAudio(state) {
+      state.currAudio = new Audio(state.playList[state.currSongIndex]['audio']);
+      state.currAudio.addEventListener('ended', () => {
+        state.chatSocket.send(JSON.stringify({
+          'action': 'skip'
+        }))
+      });
+      state.cron = setInterval(() => {
+        state.timer++;
+       }, 1000)
+      state.currAudio.play()
+    },
+    initData(state) {
+      // clearCron needed
+      if (state.chatSocket && state.chatSocket.readyState !== 3) {
+        state.chatSocket.close()
+      }
+      state.cron= null;
+      state.currSongIndex= -1;
+      state.currAudio= null;
+      state.chatSocket= null;
+      state.roomName= '';
+      state.password= '';
+      state.playList= [];
+      state.textRecord= [];
+      state.roomTotalNum= null;
+      state.roomReadyNum= 0;
+      state.musicLength= 0;
+      state.score= null;
+    },
   },
   actions: {
     async accessRoom(context, payload) {
@@ -194,13 +178,14 @@ export default {
         } else {
           const apiUrl = context.getters.apiUrl;
           response = await axios.post(apiUrl,
-            { name: payload['name'], password: payload['password'] },
+            { name: payload['name'], password: payload['password'], music_length: payload['length'] },
             { headers: context.rootGetters['headers'] });
         }
 
         context.commit('setRoomInfo', {
           roomName: response.data['name'],
           password: response.data['password'],
+          length: response.data['music_length']
         })
 
         context.commit('setSocket', { url: context.getters['socketUrl']});
@@ -228,17 +213,18 @@ export default {
       }
     },
     onMessage(context, payload) {
-      console.log(payload)
       if ('message' in payload) {
         context.commit('appendText',{ 'message': payload['user_name'] + ': ' + payload['message'] })
       } else if ('action' in payload) {
         if ('round' in payload) {
+          context.commit('setRound', payload);
           if (payload['action'] == 'start') {
-            context.commit('startGame',payload)
+            context.commit('setAudio');
           } else if (payload['action'] == 'skip') {
-            context.commit('skipGame',payload)
+            context.commit('clearCron');
+            context.commit('setAudio');
           } else {
-            context.commit('endGame',payload)
+            context.commit('clearCron');
           }
           context.commit('setNum', { 'ready': 0 });
         } else if (payload['action'] === 'correct') {
@@ -246,6 +232,9 @@ export default {
             'message': '정답 ' + payload['user_name'],
           })
           context.commit('setCorrect', {'correct':true});
+          context.commit('setShowAnswer', {'showAnswer':true});
+        } else if (payload['action'] === 'showAnswer') {
+          context.commit('setShowAnswer', {'showAnswer':true});
         }
       } else if ('ready' in payload) {
         context.commit('setNum', payload)
@@ -259,11 +248,9 @@ export default {
         const name_list = payload['user_names'].slice(0,-1).split(',');
         const score_list = payload['score'].slice(0,-1).split(',');
         for (const i in name_list) {
-          console.log(typeof i)
           score.push(`${+i+1}등 ${name_list[i]} ${score_list[i]}점`)
         }
         context.commit('setScore', { 'score': score })
-        console.log(score)
       }
     },
   }
