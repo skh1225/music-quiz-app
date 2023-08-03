@@ -246,15 +246,6 @@ class SingerViewSet(mixins.DestroyModelMixin,
             ),
         ]
     ),
-    partial_update=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                'rebuild_music',
-                OpenApiTypes.INT, enum=[0, 1],
-                description='rebuild music list',
-            ),
-        ]
-    )
 )
 class RoomViewSet(viewsets.ModelViewSet):
     """View for manage recipe APIs."""
@@ -291,7 +282,9 @@ class RoomViewSet(viewsets.ModelViewSet):
         return self.serializer_class
 
     def create(self, request, *args, **kwargs):
-        request.data['music_list'] = list(Music.objects.order_by('?').values_list('id', flat=True)[:50])
+        if 'music_length' not in request.data:
+            request.data['music_length'] = 50
+        request.data['music_list'] = list(Music.objects.order_by('?').values_list('id', flat=True)[:request.data['music_length']])
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -319,8 +312,8 @@ class RoomViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
     def partial_update(self, request, *args, **kwargs):
-        if bool(int(self.request.query_params.get('rebuild_music', 0))):
-            request.data['music_list'] = list(Music.objects.order_by('?').values_list('id', flat=True)[:50])
+        if 'music_length' in request.data:
+            request.data['music_list'] = list(Music.objects.order_by('?').values_list('id', flat=True)[:request.data['music_length']])
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
 

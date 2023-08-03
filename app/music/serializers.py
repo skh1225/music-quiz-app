@@ -111,7 +111,7 @@ class RoomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Room
-        fields = ['name', 'is_team_battle', 'is_full', 'max_user']
+        fields = ['name', 'is_team_battle', 'is_full', 'max_user', 'music_length']
 
 
 class RoomDetailSerializer(RoomSerializer):
@@ -120,11 +120,12 @@ class RoomDetailSerializer(RoomSerializer):
     class Meta(RoomSerializer.Meta):
         fields = RoomSerializer.Meta.fields + ['music_list', 'password']
 
+
 class RoomPatchSerializer(RoomSerializer):
     """Serializer for Room."""
 
     class Meta(RoomSerializer.Meta):
-        fields = RoomSerializer.Meta.fields + ['music_list']
+        fields = RoomSerializer.Meta.fields + ['music_list', 'music_length']
         read_only_fields = ['name']
 
 

@@ -141,7 +141,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.room_group_name, {"type": "chat_message", "message": message, "user_name": self.scope['user'].name}
             )
 
-            if (i >= 0 and i < 50 and
+            if (i >= 0 and i < int(self.conn.llen(self.room_group_name+'_mlist')) and
                 ''.join(message.split(' ')).lower() == self.conn.lrange(self.room_group_name+'_mlist', i, i)[0].decode() and
                 not int(self.conn.hget(self.room_group_name+'_info','state'))):
                   self.conn.hset(self.room_group_name+'_info', 'state', 1)
@@ -182,7 +182,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                                 self.room_group_name, {"type": "action_message", "action": "showAnswer"}
                             )
                             delay = True
-                        if i == 50-1:
+                        if i == int(self.conn.llen(self.room_group_name+'_mlist'))-1:
                             self.conn.delete(self.room_group_name+'_ready')
                             self.conn.hset(self.room_group_name+'_info', 'state', 0)
                             await self.channel_layer.group_send(
@@ -215,7 +215,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if "round" in event:
           data["round"] = event["round"]
         if "delay" in event and event["delay"]:
-          await asyncio.sleep(5.0)
+          await asyncio.sleep(7.0)
         # Send message to WebSocket
         await self.send(text_data=json.dumps(data))
 
