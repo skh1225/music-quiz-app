@@ -16,7 +16,7 @@ const store = createStore({
   getters: {
     url(state) {
       return state.url;
-    }
+    },
   }
 })
 

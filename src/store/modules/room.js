@@ -11,6 +11,7 @@ export default {
       password: '',
       correct: false,
       showAnswer: false,
+      isSkipped: false,
       cron: null,
       currAudio: null,
       chatSocket: null,
@@ -25,6 +26,9 @@ export default {
     };
   },
   getters: {
+    getIsSkipped(state) {
+      return state.isSkipped;
+    },
     getProgress(state) {
       return state.currSongIndex+1+' / '+state.musicLength;
     },
@@ -86,6 +90,9 @@ export default {
     },
   },
   mutations: {
+    setSkipped(state) {
+      state.isSkipped = true;
+    },
     setCorrect(state, payload) {
       state.correct = payload['correct'];
     },
@@ -123,12 +130,13 @@ export default {
     },
     setRound(state, payload) {
       state.currSongIndex = +payload['round'];
+      state.isSkipped = false;
     },
     clearCron(state) {
+      state.showAnswer = false;
       if (state.currAudio !== null) {
         clearInterval(state.cron);
         state.correct = false;
-        state.showAnswer = false;
         state.timer = 0;
         state.currAudio.pause();
       }
@@ -137,7 +145,8 @@ export default {
       state.currAudio = new Audio(state.playList[state.currSongIndex]['audio']);
       state.currAudio.addEventListener('ended', () => {
         state.chatSocket.send(JSON.stringify({
-          'action': 'skip'
+          'action': 'skip',
+          'state' : 'end'
         }))
       });
       state.cron = setInterval(() => {
@@ -205,30 +214,46 @@ export default {
       }
     },
     onMessage(context, payload) {
+      console.log(payload)
       if ('message' in payload) {
         context.commit('appendText',{ 'message': payload['user_name'] + ': ' + payload['message'] })
       } else if ('action' in payload) {
         if ('round' in payload) {
-          context.commit('setRound', payload);
           if (payload['action'] == 'start') {
+            context.commit('setRound', payload);
             context.commit('setAudio');
+            context.commit('setNum', { 'ready': 0 });
           } else if (payload['action'] == 'skip') {
-            context.commit('clearCron');
-            context.commit('setAudio');
+            if (payload['delay']) {
+              context.commit('setShowAnswer', {'showAnswer':true});
+              setTimeout(() => {
+                context.commit('clearCron');
+                context.commit('setRound', payload);
+                context.commit('setAudio');
+                context.commit('setNum', { 'ready': 0 });
+              }, +payload['delay']*1000)
+            } else {
+              context.commit('clearCron');
+              context.commit('setRound', payload);
+              context.commit('setAudio');
+              context.commit('setNum', { 'ready': 0 });
+            }
           } else {
             context.commit('clearCron');
+            context.commit('setRound', payload);
+            context.commit('setNum', { 'ready': 0 });
           }
-          context.commit('setNum', { 'ready': 0 });
         } else if (payload['action'] === 'correct') {
           context.commit('appendText',{
             'message': '정답 ' + payload['user_name'],
           })
           context.commit('setCorrect', {'correct':true});
           context.commit('setShowAnswer', {'showAnswer':true});
-        } else if (payload['action'] === 'showAnswer') {
-          context.commit('setShowAnswer', {'showAnswer':true});
         }
       } else if ('ready' in payload) {
+        if ( context.rootGetters['userId'] === payload['email'] ) {
+          context.commit('setSkipped')
+        }
         context.commit('setNum', payload)
       } else if ('notice' in payload) {
         context.commit('appendText',{

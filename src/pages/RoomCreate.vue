@@ -77,15 +77,8 @@ textarea {
   display: block;
   width: 100%;
   font: inherit;
-  border: 1px solid #ccc;
+  border: none;
   padding: 0.15rem;
-}
-
-input:focus,
-textarea:focus {
-  border-color: #3d008d;
-  background-color: #faf6ff;
-  outline: none;
 }
 
 .errors {

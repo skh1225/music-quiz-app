@@ -17,7 +17,7 @@
     </div>
     <div>
       <transition name="thumnail">
-        <img :src="imgsrc" v-if="showAnswer">
+        <img :src="imgsrc" v-if="showAnswer && imgsrc">
       </transition>
       <textarea readonly ref="chatRecord" @input="resize" :value="textValue"></textarea>
     </div>
@@ -53,6 +53,7 @@ export default {
       sTm: 40,
       tTm: 70,
       tItv: 15,
+      keyPressSound: null,
     };
   },
   watch: {
@@ -111,7 +112,7 @@ export default {
       }
     },
     showAnswer(value) {
-      if (value) {
+      if (value && this.currSongInfo) {
         this.tHint = this.currSongInfo['title'];
         this.sHint = this.currSongInfo['singer'];
         this.dHint = this.currSongInfo['description'];
@@ -119,6 +120,9 @@ export default {
     }
   },
   computed: {
+    isSkipped() {
+      return this.$store.getters['room/getIsSkipped'] || this.showAnswer;
+    },
     progress() {
       return 'ROUND ' + this.$store.getters['room/getProgress'];
     },
@@ -152,12 +156,17 @@ export default {
   },
   methods: {
     submit() {
-      this.socket.send(JSON.stringify({
+      if (this.enteredInput) {
+        this.socket.send(JSON.stringify({
         'message': this.enteredInput
       }))
+      }
       this.enteredInput = '';
     },
     skip() {
+      if (!this.isSkipped) {
+        this.keyPressSound.play();
+      }
       this.socket.send(JSON.stringify({
         'action': 'skip'
       }))
@@ -174,24 +183,39 @@ export default {
         this.error = error.message || 'Something went wrong!';
         console.log(this.error);
       }
+    },
+    leave(event) {
+      event.preventDefault();
+      event.returnValue = '';
+    },
+    skipKeyDown(event) {
+      if ( event.target.nodeName == 'INPUT' ) return;
+      if ( event.key.toLowerCase() === 'p' && !this.isSkipped ) {
+        this.skip();
+      }
     }
   },
-  beforeUnmount() {
-    console.log('before-unmount')
-    this.unmount = true;
-    clearInterval(this.reconnectInterval)
-    this.$store.commit('room/clearCron')
-    this.$store.commit('room/initData')
-    // this.$router.replace('/home');
-  },
   mounted() {
+    window.addEventListener("keydown", this.skipKeyDown);
+    window.addEventListener('beforeunload', this.leave);
     this.reconnectInterval = setInterval(() => {
       if (this.socket && !this.unmount && this.socket.readyState == 3) {
         console.log('try reconnect...')
         this.access();
       }
     }, 2000);
-  }
+    this.keyPressSound = new Audio(require('./sound/skip.mp3'));
+  },
+  beforeUnmount() {
+    console.log('before-unmount')
+    window.removeEventListener("keydown", this.skipKeyDown);
+    window.removeEventListener('beforeunload', this.leave)
+    this.unmount = true;
+    clearInterval(this.reconnectInterval)
+    this.$store.commit('room/clearCron')
+    this.$store.commit('room/initData')
+    // this.$router.replace('/home');
+  },
 }
 </script>
 
@@ -199,13 +223,23 @@ export default {
 
 .thumnail-enter-from {
   opacity: 0;
+  transform: translate(-100%, -50%);
 }
-
 .thumnail-enter-active {
-  transition: all 3s ease-in;
+  transition: all 0.6s ease-in;
 }
+.thumnail-leave-from,
 .thumnail-enter-to {
   opacity: 0.3;
+  transform: translate(-50%, -50%);
+}
+.thumnail-leave-active {
+  transition: all 0.6s ease-out;
+}
+
+.thumnail-leave-to {
+  opacity: 0;
+  transform: translate(0%, -50%);
 }
 
 section {
@@ -238,7 +272,7 @@ textarea {
   max-width: 100%;
   width: 640px;
   height: 360px;
-  border: solid 1px white;
+  border: none;
   color: white;
   opacity: 1;
   overflow: hidden;
