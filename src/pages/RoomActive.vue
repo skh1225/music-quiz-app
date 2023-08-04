@@ -121,7 +121,7 @@ export default {
   },
   computed: {
     isSkipped() {
-      return this.$store.getters['room/getIsSkipped'] || this.showAnswer;
+      return this.$store.getters['room/getIsSkipped'];
     },
     progress() {
       return 'ROUND ' + this.$store.getters['room/getProgress'];
@@ -156,6 +156,8 @@ export default {
   },
   methods: {
     submit() {
+      console.log(this.currSongInfo)
+      console.log(this.$store.state['currSongIndex'])
       if (this.enteredInput) {
         this.socket.send(JSON.stringify({
         'message': this.enteredInput
