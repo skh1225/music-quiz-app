@@ -140,12 +140,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         i = int(self.conn.get(self.room_group_name+'_round'))
+
         if 'message' in text_data_json:
             message = text_data_json["message"]
             await self.channel_layer.group_send(
                 self.room_group_name, {"type": "chat_message", "message": message, "user_name": self.scope['user'].name}
             )
-
+            print(i)
+            print(''.join(message.split(' ')).lower() == self.conn.lrange(self.room_group_name+'_mlist', i, i)[0].decode())
+            print(''.join(message.split(' ')).lower(), self.conn.lrange(self.room_group_name+'_mlist', i, i)[0].decode())
+            print(int(self.conn.get(self.room_group_name+'_state') or 0))
             if (i >= 0 and i < int(self.conn.llen(self.room_group_name+'_mlist')) and
                 ''.join(message.split(' ')).lower() == self.conn.lrange(self.room_group_name+'_mlist', i, i)[0].decode() and
                 not int(self.conn.get(self.room_group_name+'_state') or 0)):
@@ -168,6 +172,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         await self.channel_layer.group_send(
                             self.room_group_name, {"type": "skip_message", "action": "start", "round": i+1}
                         )
+                        self.conn.incr(self.room_group_name+'_round')
                     else:
                         await self.channel_layer.group_send(
                             self.room_group_name, {"type": "ready_message", "ready": ready_num, "total": total_num, "email": self.scope['user'].email}
@@ -175,6 +180,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 else:
                     delay = False
                     if total_num//2+1 == ready_num:
+                        self.conn.incr(self.room_group_name+'_round')
                         if not int(self.conn.get(self.room_group_name+'_state') or 0):
                             self.conn.set(self.room_group_name+'_state', 1)
                             delay = 10
@@ -208,7 +214,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         else:
           self.conn.delete(self.room_group_name+'_ready')
           self.conn.delete(self.room_group_name+'_state')
-        self.conn.incr(self.room_group_name+'_round')
         await self.send(text_data=json.dumps(data))
 
     async def action_message(self, event):
