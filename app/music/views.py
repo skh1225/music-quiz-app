@@ -107,7 +107,7 @@ class MusicViewSet(viewsets.ModelViewSet):
     def upload_audio(self, request, pk=None):
         """Upload an audio to music."""
         music = self.get_object()
-        url = request.data.__getitem__('audio')
+        url = 'https://www.youtube.com/watch?v=' + pk
 
         with tempfile.TemporaryDirectory(dir='/vol') as tempdirname:
             URLS = [url]

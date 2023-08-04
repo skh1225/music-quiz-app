@@ -86,16 +86,16 @@ class Music(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
     title = models.CharField(max_length=255)
     singers = models.ManyToManyField('Singer')
-    tags = models.ManyToManyField('Tag')
-    running_time = models.IntegerField()
+    tags = models.ManyToManyField('Tag', null=True, blank=True)
+    running_time = models.IntegerField(null=True)
     released_year = models.IntegerField(null=True)
-    description = models.CharField(max_length=255, null=True)
-    image = models.URLField(max_length=255)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    image = models.URLField(max_length=255, null=True, blank=True)
     audio = models.FileField(null=True, upload_to=music_audio_file_path)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        null=True,
+        null=True
     )
 
     def delete(self, *args, **kargs):

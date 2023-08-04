@@ -35,7 +35,6 @@ class MusicAudioSerializer(serializers.ModelSerializer):
         model = Music
         fields = ['id', 'audio']
         read_only_fields = ['id']
-        extra_kwargs = {'audio': {'required': 'True'}}
 
 
 class MusicDescriptionSerializer(serializers.ModelSerializer):
