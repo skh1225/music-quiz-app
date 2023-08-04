@@ -190,7 +190,7 @@ export default {
     },
     skipKeyDown(event) {
       if ( event.target.nodeName == 'INPUT' ) return;
-      if ( event.key.toLowerCase() === 'p' && !this.isSkipped ) {
+      if ( (event.key.toLowerCase() === 'p' || event.key === 'ㅔ') && !this.isSkipped ) {
         this.skip();
       }
     }
