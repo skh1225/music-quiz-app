@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section v-if="!!this.socket">
     <div class="container">
       <div class="score">
         <ul>
@@ -27,6 +27,9 @@
       <button @click="skip">Skip</button>
     </div>
   </section>
+  <div v-else>
+    <base-spinner></base-spinner>
+  </div>
 </template>
 
 <script>
@@ -49,10 +52,10 @@ export default {
       imgsrc: '',
       confetti: new JSConfetti(),
       cho: ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"],
-      dTm: 20,
-      sTm: 40,
-      tTm: 70,
-      tItv: 15,
+      dTm: 10,
+      sTm: 20,
+      tTm: 40,
+      tItv: 10,
       keyPressSound: null,
     };
   },
@@ -187,23 +190,29 @@ export default {
       }
     },
     leave(event) {
+      console.log(event)
       event.preventDefault();
       event.returnValue = '';
     },
     skipKeyDown(event) {
-      if ( event.target.nodeName == 'INPUT' ) return;
-      if ( (event.key.toLowerCase() === 'p' || event.key === 'ㅔ') && !this.isSkipped ) {
+      if ( event.keyCode == 38 && !this.isSkipped ) {
         this.skip();
       }
-    }
+    },
   },
   mounted() {
+    console.log('mounted')
     window.addEventListener("keydown", this.skipKeyDown);
     window.addEventListener('beforeunload', this.leave);
     this.reconnectInterval = setInterval(() => {
-      if (this.socket && !this.unmount && this.socket.readyState == 3) {
+      if (!this.unmount && !this.error && !this.socket) {
         console.log('try reconnect...')
-        this.access();
+        try {
+          this.access();
+        } catch(error) {
+          this.error = error.message || 'Something went wrong!';
+          console.log(this.error);
+        }
       }
     }, 2000);
     this.keyPressSound = new Audio(require('./sound/skip.mp3'));
@@ -222,7 +231,6 @@ export default {
 </script>
 
 <style scoped>
-
 .thumnail-enter-from {
   opacity: 0;
   transform: translate(-100%, -50%);
@@ -297,6 +305,7 @@ img {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  font-size: 0.85rem;
 }
 
 .bottom {
@@ -336,7 +345,6 @@ button {
 ul {
   list-style: none;
   padding-left: 10px;
-  font-size: 15px;
 }
 
 

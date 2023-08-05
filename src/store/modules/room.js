@@ -188,6 +188,8 @@ export default {
           password: response.data['password'],
           length: response.data['music_length']
         })
+        localStorage.setItem('roomName', payload['name']);
+        localStorage.setItem('roomPass', payload['password']);
 
         context.commit('setSocket', { url: context.getters['socketUrl']});
         const socket = context.getters['getSocket'];
