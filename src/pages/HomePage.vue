@@ -10,7 +10,7 @@
     </section>
     <section @click="playGame">
       <h2>Play</h2>
-      <p>노맞?</p>
+      <p>노래 맞추기</p>
     </section>
   </div>
 </template>
