@@ -136,7 +136,7 @@ class MusicViewSet(viewsets.ModelViewSet):
                     request.data['released_year'] = dates[0][:4]
             request.data['tags'] = request.data.get('tags',[])
             if 'released_year' in request.data:
-                request.data['tags'].append({ 'name': request.data['released_year'][:3]+'0년대' })
+                request.data['tags'].append({ 'name': str(request.data['released_year'])[:3]+'0년대' })
         serializer = self.get_serializer(music, data=request.data)
 
         if serializer.is_valid():
