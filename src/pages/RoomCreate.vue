@@ -14,6 +14,10 @@
         <label for="round">Round</label>
         <input id="round" type="number" min="1" max="100" v-model.trim="round"/>
       </div>
+      <div class="form-control">
+        <label for="tags">Tags</label>
+        <input id="tags" type="text" v-model.trim="tags"/>
+      </div>
       <base-button>Create</base-button>
     </form>
   </div>
@@ -25,6 +29,7 @@ export default {
     return {
       roomName: '',
       password: '',
+      tags: '',
       round: 50,
       error: null,
     }
@@ -37,6 +42,7 @@ export default {
         name: this.roomName,
         password: this.password,
         length: this.round,
+        tags: this.tags,
         mode: 'create',
       })
       } catch(error) {

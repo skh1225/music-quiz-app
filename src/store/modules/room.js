@@ -142,6 +142,9 @@ export default {
       }
     },
     setAudio(state) {
+      if (!state.chatSocket) {
+        return;
+      }
       state.currAudio = new Audio(state.playList[state.currSongIndex]['audio']);
       state.currAudio.addEventListener('ended', () => {
         state.chatSocket.send(JSON.stringify({
@@ -180,9 +183,9 @@ export default {
           params: { password: payload['password'] },
           headers: context.rootGetters['headers']
         }):await axios.post(context.getters.apiUrl,
-          { name: payload['name'], password: payload['password'], music_length: payload['length'] },
+          { name: payload['name'], password: payload['password'], music_length: payload['length'], music_tags: payload['tags'] },
           { headers: context.rootGetters['headers'] });
-
+        console.log(response.data)
         context.commit('setRoomInfo', {
           roomName: response.data['name'],
           password: response.data['password'],
