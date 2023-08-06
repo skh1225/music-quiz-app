@@ -53,7 +53,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        if self.scope['user'].room_name is not None:
+        if self.scope['user'].room_name:
             await self.channel_layer.group_discard(self.scope['user'].room_name, self.scope['user'].channel_name)
 
             if self.scope['user'].room_name != self.room_group_name:
@@ -134,7 +134,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             "user_name": self.scope['user'].name
                             }
                     )
-        await update_user_channel(self.scope['user'], None, None)
+        await update_user_channel(self.scope['user'], '', '')
 
     # Receive message from WebSocket
     async def receive(self, text_data):
