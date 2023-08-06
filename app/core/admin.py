@@ -47,4 +47,5 @@ class UserAdmin(BaseUserAdmin):
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.Music)
 admin.site.register(models.Tag)
+admin.site.register(models.Singer)
 admin.site.register(models.Room)

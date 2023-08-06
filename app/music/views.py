@@ -3,6 +3,7 @@ Views for the music APIs
 """
 import tempfile
 import yt_dlp
+import re
 from urllib.request import urlopen
 
 from drf_spectacular.utils import (
@@ -28,8 +29,7 @@ from core.models import (
     Music,
     Tag,
     Singer,
-    Room,
-    User
+    Room
 )
 
 from music import serializers
@@ -122,8 +122,24 @@ class MusicViewSet(viewsets.ModelViewSet):
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 error_code = ydl.download(URLS)
+                info_by_ytdlp = ydl.extract_info(url, download=False)
+
             temp_file = open(f'{tempdirname}/foo.mp3', "rb")
             request.data.__setitem__('audio', File(temp_file))
+
+            if 'released_year' not in request.data:
+                if info_by_ytdlp['release_year']:
+                    request.data['released_year'] = info_by_ytdlp['release_year']
+                else:
+                    dates = re.findall(r'\d{4}-\d{2}-\d{2}', info_by_ytdlp['description'])
+                    if dates:
+                        dates.sort()
+                        request.data['released_year'] = dates[0][:4]
+            print(request.data.get('tags',[]))
+            request.data['tags'] = request.data.get('tags',[])
+            if 'released_year' in request.data:
+                request.data['tags'].append({ 'name': request.data['released_year'][:3]+'0년대' })
+            print(request.data)
         serializer = self.get_serializer(music, data=request.data)
 
         if serializer.is_valid():
@@ -296,7 +312,7 @@ class RoomViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         password = self.request.query_params.get('password', None)
-        if serializer.data['password'] is None and password is None or serializer.data['password'] == password:
+        if not serializer.data['password'] and not password or serializer.data['password'] == password:
             return Response(serializer.data)
 
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
@@ -305,7 +321,7 @@ class RoomViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         password = self.request.query_params.get('password', None)
-        if serializer.data['password'] is None and password is None or serializer.data['password'] == password:
+        if not serializer.data['password'] and not password or serializer.data['password'] == password:
             self.perform_destroy(instance)
             return Response(status=status.HTTP_204_NO_CONTENT)
 

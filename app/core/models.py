@@ -51,12 +51,12 @@ class UserManager(BaseUserManager):
 class Room(models.Model):
     """Singer object."""
     name = models.CharField(max_length=255, primary_key=True)
-    password = models.CharField(max_length=255, null=True)
+    password = models.CharField(max_length=255, blank=True)
     is_team_battle = models.BooleanField(default=False)
     is_full = models.BooleanField(default=False)
     max_user = models.IntegerField(validators=[MinValueValidator(1),
                                                MaxValueValidator(8)], default=6)
-    music_list = ArrayField(models.CharField(max_length=255), null=True)
+    music_list = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     music_length = models.IntegerField(validators=[MinValueValidator(1),
                                                MaxValueValidator(100)])
 
@@ -67,8 +67,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     """User in the system."""
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
-    room_name = models.CharField(max_length=255, null=True)
-    channel_name = models.CharField(max_length=255, null=True)
+    room_name = models.CharField(max_length=255, blank=True)
+    channel_name = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     objects = UserManager()
@@ -85,17 +85,18 @@ class Music(models.Model):
     )
     id = models.CharField(max_length=255, primary_key=True)
     title = models.CharField(max_length=255)
-    singers = models.ManyToManyField('Singer')
-    tags = models.ManyToManyField('Tag', null=True, blank=True)
-    running_time = models.IntegerField(null=True)
-    released_year = models.IntegerField(null=True)
-    description = models.CharField(max_length=255, null=True, blank=True)
+    singers = models.ManyToManyField('Singer', blank=True)
+    tags = models.ManyToManyField('Tag', blank=True)
+    running_time = models.IntegerField(null=True, blank=True)
+    released_year = models.IntegerField(null=True, blank=True)
+    description = models.CharField(max_length=255, blank=True)
     image = models.URLField(max_length=255, null=True, blank=True)
     audio = models.FileField(null=True, upload_to=music_audio_file_path)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        blank=True
     )
 
     def delete(self, *args, **kargs):
@@ -111,12 +112,6 @@ class Music(models.Model):
 class Tag(models.Model):
     """Tag object."""
     name = models.CharField(max_length=255)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-    )
-
 
     def __str__(self):
         return self.name
@@ -124,12 +119,6 @@ class Tag(models.Model):
 class Singer(models.Model):
     """Singer object."""
     name = models.CharField(max_length=255)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-    )
-
 
     def __str__(self):
         return self.name

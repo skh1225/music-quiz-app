@@ -5,6 +5,9 @@ upstream channels {
 server {
     listen ${LISTEN_PORT};
 
+    access_log /var/log/nginx/a.log;
+    error_log /var/log/nginx/e.log;
+
     location /static {
         alias /vol/static;
     }
@@ -22,7 +25,8 @@ server {
     }
 
     location / {
-        alias /var/www/html/;
+        root /var/www/html/;
         index index.html index.htm;
+        error_page 404 =200 /index.html;
     }
 }

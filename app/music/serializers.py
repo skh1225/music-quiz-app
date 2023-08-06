@@ -30,16 +30,36 @@ class SingerSerializer(serializers.ModelSerializer):
 
 class MusicAudioSerializer(serializers.ModelSerializer):
     """Serializer for uploading images to recipes."""
-
+    tags = TagSerializer(many=True, required=False)
     class Meta:
         model = Music
-        fields = ['id', 'audio']
+        fields = ['id', 'audio', 'released_year', 'tags']
         read_only_fields = ['id']
+
+    def _get_or_create_tags(self, tags, music):
+        """Handle getting or creating tags as needed."""
+        for tag in tags:
+            tag_obj, created = Tag.objects.get_or_create(
+                **tag,
+            )
+            music.tags.add(tag_obj)
+
+    def update(self, instance, validated_data):
+        """Update recipe."""
+        tags = validated_data.pop('tags', None)
+        if tags is not None:
+            instance.tags.clear()
+            self._get_or_create_tags(tags, instance)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
 
 
 class MusicDescriptionSerializer(serializers.ModelSerializer):
     """Serializer for uploading images to recipes."""
-
     class Meta:
         model = Music
         fields = ['description']
@@ -57,20 +77,16 @@ class MusicSerializer(serializers.ModelSerializer):
 
     def _get_or_create_tags(self, tags, music):
         """Handle getting or creating tags as needed."""
-        auth_user = self.context['request'].user
         for tag in tags:
             tag_obj, created = Tag.objects.get_or_create(
-                user=auth_user,
                 **tag,
             )
             music.tags.add(tag_obj)
 
     def _get_or_create_singers(self, singers, music):
         """Handle getting or creating singers as needed."""
-        auth_user = self.context['request'].user
         for singer in singers:
             singer_obj, created = Singer.objects.get_or_create(
-                user=auth_user,
                 **singer,
             )
             music.singers.add(singer_obj)
