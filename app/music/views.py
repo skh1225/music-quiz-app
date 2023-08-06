@@ -295,9 +295,13 @@ class RoomViewSet(viewsets.ModelViewSet):
         return self.serializer_class
 
     def create(self, request, *args, **kwargs):
+        music_queryset = Music.objects.all()
         if 'music_length' not in request.data:
             request.data['music_length'] = 50
-        request.data['music_list'] = list(Music.objects.order_by('?').values_list('id', flat=True)[:request.data['music_length']])
+        if request.data['music_tags']:
+            tag_ids = [int(str_id) for str_id in request.data['music_tags'].split(',')]
+            music_queryset = music_queryset.filter(tags__id__in=tag_ids)
+        request.data['music_list'] = list(music_queryset.order_by('?').values_list('id', flat=True)[:request.data['music_length']])
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

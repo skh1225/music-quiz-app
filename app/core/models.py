@@ -52,6 +52,7 @@ class Room(models.Model):
     """Singer object."""
     name = models.CharField(max_length=255, primary_key=True)
     password = models.CharField(max_length=255, blank=True)
+    music_tags = models.CharField(max_length=255, blank=True)
     is_team_battle = models.BooleanField(default=False)
     is_full = models.BooleanField(default=False)
     max_user = models.IntegerField(validators=[MinValueValidator(1),
