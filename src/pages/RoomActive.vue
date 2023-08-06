@@ -290,7 +290,7 @@ div {
   background-color: rgba(255,255,255,0.1);
   height: 200px;
   max-width: 49%;
-  width: 320px;
+  width: 317px;
 }
 textarea {
   max-width: 100%;
