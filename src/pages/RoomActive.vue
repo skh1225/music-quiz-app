@@ -1,18 +1,22 @@
 <template>
   <section v-if="!!this.socket">
     <div class="container">
-      <div class="score">
+      <div class="half">
         <ul>
           <li v-for="score in scores" :key="score">{{ score }}</li>
         </ul>
-        <p class="bottom">{{ readyTotal }}</p>
-        <p class="progress">{{ progress }}</p>
+        <div class="bottom">
+          <p>{{ readyTotal }}</p>
+          <p>{{ progress }}</p>
+        </div>
       </div>
-      <div class="hint">
+      <div class="half" style="text-align:center">
         <p>{{ dHint }}</p>
         <p>{{ sHint }}</p>
         <p class="thint">{{ tHint }}</p>
-        <p class="bottom">{{ timer }}초</p>
+        <div class="bottom">
+          <p>{{ timer }}초</p>
+        </div>
       </div>
     </div>
     <div>
@@ -53,9 +57,10 @@ export default {
       confetti: new JSConfetti(),
       cho: ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"],
       dTm: 10,
-      sTm: 20,
-      tTm: 40,
-      tItv: 10,
+      sTm: 15,
+      tTm: 30,
+      eta: 50,
+      tLimit: 90,
       keyPressSound: null,
     };
   },
@@ -68,13 +73,18 @@ export default {
     },
     timer(value) {
       if (!this.showAnswer) {
+        if  (value === this.tLimit) {
+          this.socket.send(JSON.stringify({
+            'action': 'skip'
+          }))
+        }
         if (value === this.dTm) {
         this.dHint = this.description;
         }
         if (value === this.sTm) {
           this.sHint = this.singer;
         }
-        if ( value>=this.tTm && Math.floor((value-this.tTm)/this.tItv) <= this.titleLength && value%this.tItv === 0) {
+        if ( value>=this.tTm && Math.floor((value-this.tTm)/this.tItv) <= this.titleLength && (value-this.tTm)%this.tItv === 0) {
           this.tHint = this.titleHint.slice(0, Math.floor((value-this.tTm)/this.tItv))
           const last = Math.floor((value-this.tTm)/this.tItv);
           for (const c of this.titleHint.slice(last,this.titleLength).split(' ')) {
@@ -123,6 +133,9 @@ export default {
     }
   },
   computed: {
+    tItv() {
+      return Math.floor(this.eta/this.titleLength)
+    },
     isSkipped() {
       return this.$store.getters['room/getIsSkipped'];
     },
@@ -260,34 +273,42 @@ div {
   text-align: center;
   margin: 5px;
 }
-.score {
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  column-gap: 0.4rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+  min-width: 360px;
+}
+.half {
   display: inline-block;
   text-align: left;
   margin: 0;
-  border: solid 1px white;
+  border: none;
+  background-color: rgba(255,255,255,0.1);
   height: 200px;
-  max-width: 50%;
-  width: 320px;
-}
-.hint {
-  display: inline-block;
-  text-align: center;
-  margin: 0;
-  border: solid 1px white;
-  height: 200px;
-  max-width: 50%;
+  max-width: 49%;
   width: 320px;
 }
 textarea {
   max-width: 100%;
+  min-width: 360px;
   width: 640px;
   height: 360px;
   border: none;
-  color: white;
+  resize: none;
   opacity: 1;
   overflow: hidden;
-  background-color: rgb(0,0,0,0);
+  color: white;
+  background-color: rgba(255,255,255,0.1);
 }
+
+textarea:focus {
+  outline: none;
+}
+
 .thint {
   letter-spacing: 2px;
 }
@@ -301,45 +322,33 @@ img {
   transform: translate(-50%, -50%);
   opacity: 0.3;
 }
-.container {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  font-size: 0.85rem;
-}
 
 .bottom {
-  position: absolute;
   bottom: 0;
-  margin-left: 10px;
-}
-
-.progress {
+  width: 100%;
   position: absolute;
-  bottom: 0;
-  right: 0;
-  margin-right: 10px;
+  display: flex;
+  justify-content: space-between;
+  padding-right: 1rem;
+  padding-left: 0.6rem;
+  white-space: nowrap;
 }
 
 input {
   max-width: 500px;
   width: 70%;
   height: 32px;
-  border: solid 1px white;
-  outline: none;
   padding-left: 5px;
-  color: white;
-  background-color:rgb(0,0,0,0);
 }
 
 button {
-  background-color: rgb(0,0,0,0);
-  border: solid 1px white;
+  background-color: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
   max-width: 60px;
   width: 12%;
   height: 32px;
   margin-left: 10px;
-  color: white;
 }
 
 ul {

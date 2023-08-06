@@ -11,8 +11,8 @@
         <input id="password" type="password" v-model.trim="password"/>
       </div>
       <div class="form-control">
-        <label for="round">Round(max100)</label>
-        <input id="round" type="number" v-model.trim="round"/>
+        <label for="round">Round</label>
+        <input id="round" type="number" min="1" max="100" v-model.trim="round"/>
       </div>
       <base-button>Create</base-button>
     </form>
@@ -65,28 +65,12 @@ form {
   margin: 0.5rem 0;
 }
 
-label {
-  font-weight: bold;
-  color: white;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
 input,
 textarea {
   display: block;
   width: 100%;
   font: inherit;
-  border: none;
   padding: 0.15rem;
 }
 
-.errors {
-  font-weight: bold;
-  color: red;
-}
-
-.actions {
-  text-align: center;
-}
 </style>

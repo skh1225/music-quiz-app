@@ -74,12 +74,13 @@ dialog {
   margin: 0;
   overflow: hidden;
   color: white;
-  background-color: black;
+  background-color: #41464a;
+  opacity: 0.9;
 }
 
 header {
-  background-color: white;
-  color: black;
+  background-color: #242729;
+  color: white;
   width: 100%;
   padding: 1rem;
 }

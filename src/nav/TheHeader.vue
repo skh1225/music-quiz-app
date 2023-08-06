@@ -69,18 +69,12 @@ header {
 
 header a {
   text-decoration: none;
-  color: white;
   display: inline-block;
   padding: 0.75rem 1.5rem;
   border: 1px solid transparent;
 }
 
 h1 {
-  margin: 0;
-}
-
-h1 a {
-  color: white;
   margin: 0;
 }
 

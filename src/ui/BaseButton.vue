@@ -35,13 +35,14 @@ a {
   text-decoration: none;
   padding: 0.75rem 1.5rem;
   font: inherit;
-  background-color: transparent;
-  border: 1px solid white;
+  background-color: rgba(255,255,255,0.1);
+  border: none;
   color: white;
   cursor: pointer;
   border-radius: 30px;
   margin-right: 0.5rem;
   display: inline-block;
+  white-space: nowrap;
 }
 
 .flat {

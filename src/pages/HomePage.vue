@@ -32,11 +32,10 @@ section {
   width: 100%;
   height: 10rem;
   background-color: rgba(128, 128, 128, 0.2);
-  color: white;
   text-align: center;
   vertical-align: center;
   padding: 2rem;
-  margin: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 section:hover {
