@@ -127,19 +127,16 @@ class MusicViewSet(viewsets.ModelViewSet):
             temp_file = open(f'{tempdirname}/foo.mp3', "rb")
             request.data.__setitem__('audio', File(temp_file))
 
-            if 'released_year' not in request.data:
-                if info_by_ytdlp['release_year']:
-                    request.data['released_year'] = info_by_ytdlp['release_year']
-                else:
-                    dates = re.findall(r'\d{4}-\d{2}-\d{2}', info_by_ytdlp['description'])
-                    if dates:
-                        dates.sort()
-                        request.data['released_year'] = dates[0][:4]
-            print(request.data.get('tags',[]))
+            if info_by_ytdlp['release_year']:
+                request.data['released_year'] = info_by_ytdlp['release_year']
+            else:
+                dates = re.findall(r'\d{4}-\d{2}-\d{2}', info_by_ytdlp['description'])
+                if dates:
+                    dates.sort()
+                    request.data['released_year'] = dates[0][:4]
             request.data['tags'] = request.data.get('tags',[])
             if 'released_year' in request.data:
                 request.data['tags'].append({ 'name': request.data['released_year'][:3]+'0년대' })
-            print(request.data)
         serializer = self.get_serializer(music, data=request.data)
 
         if serializer.is_valid():
