@@ -43,9 +43,13 @@ class UserAdmin(BaseUserAdmin):
         }),
     )
 
+class MusicAdmin(admin.ModelAdmin):
+    search_fields = ['title', 'released_year', 'tags__name']
+
+
 
 admin.site.register(models.User, UserAdmin)
-admin.site.register(models.Music)
+admin.site.register(models.Music, MusicAdmin)
 admin.site.register(models.Tag)
 admin.site.register(models.Singer)
 admin.site.register(models.Room)
