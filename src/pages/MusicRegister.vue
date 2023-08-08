@@ -11,8 +11,8 @@
         </div>
         <div class="music-info">
           <span v-if="image && windowState>0"> <!---->
-            <h3>{{ title }}</h3>
-            <h4>{{ singer }}</h4>
+            <h3>{{ searchResult.title }}</h3>
+            <h4>{{ searchResult.singer }}</h4>
           </span>
           <p class="instruction">{{ instruction }}</p>
         </div>
@@ -45,7 +45,7 @@
           </li>
         </ul>
       </div>
-      <base-button v-if="windowState!==2 && windowState!==3">{{ formButtonName }}</base-button>
+      <base-button v-if="windowState!==3">{{ formButtonName }}</base-button>
       <base-button type="button" @click="clear">Clear</base-button>
     </form>
   </section>
@@ -92,7 +92,7 @@ export default {
        return this.$store.getters['music/getRegisterState'];
     },
     formButtonName() {
-      return this.searchState ? 'Register':'Search';
+      return this.windowState!==0 && this.windowState!==2 ? 'Register':'Search';
     },
     isExist() {
       return this.$store.getters['music/isExist']
@@ -130,8 +130,15 @@ export default {
           title: this.title,
           singer: this.singer
         })
-          this.title = this.searchResult.title;
-          this.singer = this.searchResult.singer;
+          if (!this.isExist) {
+            this.title = this.searchResult.title;
+            this.singer = this.searchResult.singer;
+          } else {
+            this.title = '';
+            this.singer = '';
+          }
+          console.log(this.isExist)
+          console.log(this.title)
           this.link = 'https://www.youtube.com/watch?v=' + this.searchResult.id;
           this.image = this.searchResult.image + '=w150-h150-l90-rj';
         } catch(error) {
@@ -256,7 +263,7 @@ li {
 .instruction {
   position: absolute;
   bottom: 0;
-  right: 0;
+  right: 1rem;
   color: red;
   font-size: 13px;
 }
