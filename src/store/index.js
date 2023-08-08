@@ -2,11 +2,13 @@ import { createStore } from 'vuex';
 
 import authModule from './modules/auth.js';
 import roomModule from './modules/room.js';
+import musicModule from './modules/music.js';
 
 const store = createStore({
   modules: {
     auth: authModule,
     room: roomModule,
+    music: musicModule,
   },
   state() {
     return {

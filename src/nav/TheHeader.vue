@@ -25,9 +25,9 @@ export default {
     },
     buttonName() {
       if (this.$route.path === '/room/access') {
-        return 'Create Room';
+        return 'Create';
       } else if (this.$route.path === '/room/create') {
-        return 'Access Room';
+        return 'Access';
       } else {
         return 'Play'
       }

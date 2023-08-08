@@ -17,8 +17,8 @@
 .spinner {
   display: flex;
   max-width: 100%;
-  width: 640px;
-  height: 360px;
+  width: inherit;
+  height: inherit;
   justify-content: center;
   align-items: center;
   width: 100%;

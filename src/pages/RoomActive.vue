@@ -95,6 +95,9 @@ export default {
       }
     },
     currSongInfo(value) {
+      if (!value) {
+        return;
+      }
       this.tHint = '';
       this.sHint = '';
       this.dHint = '';
@@ -115,7 +118,7 @@ export default {
           this.titleHint += '*';
         }
       }
-      this.imgsrc = value['image']
+      this.imgsrc = value['image'] + '=w360-h360-l90-rj';
       this.singer = value['singer'];
       this.description = value['description'];
     },

@@ -4,12 +4,12 @@
       <h2>Music List</h2>
       <p>음악 리스트를 확인해 보세요.</p>
     </section>
-    <section>
+    <section @click="registerMusic">
       <h2>Register Music</h2>
       <p>좋아하는 음악을 등록해 보세요.</p>
     </section>
     <section @click="playGame">
-      <h2>Play</h2>
+      <h2>Play Game</h2>
       <p>노래 맞추기</p>
     </section>
   </div>
@@ -20,6 +20,9 @@
 <script>
 export default {
   methods: {
+    registerMusic() {
+      this.$router.push('/music/register');
+    },
     playGame() {
       this.$router.push('/room/access');
     }

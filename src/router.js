@@ -8,6 +8,7 @@ const RoomActive = () => import('./pages/RoomActive.vue');
 const UserAuth = () => import('./pages/UserAuth.vue');
 const RoomCreate = () => import('./pages/RoomCreate.vue');
 const RoomAccess = () => import('./pages/RoomAccess.vue');
+const MusicRegister = () => import('./pages/MusicRegister.vue');
 
 const router = createRouter({
   history: createWebHistory(),
@@ -15,6 +16,7 @@ const router = createRouter({
     { path: '/', redirect: '/home' },
     { path: '/home', component: HomePage },
     { path: '/auth', component: UserAuth, meta: { requiresUnauth: true } },
+    { path: '/music/register', component: MusicRegister, meta: { requiresAuth: true } },
     { path: '/room/create', component: RoomCreate, meta: { requiresAuth: true } },
     { path: '/room/access', component: RoomAccess, meta: { requiresAuth: true } },
     { path: '/room/:roomId', component: RoomActive, meta: { requiresAuth: true, requiresRoomAuth: true } },
@@ -35,10 +37,6 @@ router.beforeEach(function(to, from, next) {
       password: localStorage.getItem('roomPass')
     });
   }
-  console.log(store.getters.isAuthenticated)
-  console.log(localStorage.getItem('roomName'))
-  console.log(store.getters['room/getRoomName'])
-  console.log(to.params.roomId)
   if ( to.meta.requiresAuth && !store.getters.isAuthenticated ) {
     next('/auth');
   } else if ( to.meta.requiresUnauth && store.getters.isAuthenticated ) {

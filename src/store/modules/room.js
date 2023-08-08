@@ -30,6 +30,9 @@ export default {
       return state.isSkipped;
     },
     getProgress(state) {
+      if (state.currSongIndex>=state.musicLength) {
+        return state.musicLength+' / '+state.musicLength;
+      }
       return state.currSongIndex+1+' / '+state.musicLength;
     },
     getTextRecord(state) {
