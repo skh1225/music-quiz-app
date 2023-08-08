@@ -1,5 +1,6 @@
 <template>
   <section>
+    <base-dialog :show="!!error" @close="closeError">{{ error }}</base-dialog>
     <section class="result-box">
       <base-spinner v-if="isLoading"></base-spinner>
       <div class="search-result" v-else>
@@ -168,7 +169,11 @@ export default {
       console.log(this.isExist)
     },
     selectTag(event) {
-      this.tag = event.target.value;
+      if (this.tag === event.target.value) {
+        this.tag = '';
+      } else {
+        this.tag = event.target.value;
+      }
     },
     clear() {
       this.title = '';
@@ -180,20 +185,26 @@ export default {
       this.instruction = '';
       this.$store.commit('music/clearData');
     },
-    skipKeyDown(event) {
+    keyDown(event) {
       if ( event.keyCode == 13 && this.windowState!==3 ) {
         this.submit();
       }
-      if (event.keyCode == 27) {
+      if ( event.keyCode == 27 && !!this.error ) {
+        this.closeError();
+      }
+      if ( event.keyCode == 27 && !this.error ) {
         this.clear();
       }
     },
+    closeError() {
+      this.error = null;
+    }
   },
   mounted() {
-    window.addEventListener("keydown", this.skipKeyDown);
+    window.addEventListener("keydown", this.keyDown);
   },
   beforeUnmount() {
-    window.removeEventListener("keydown", this.skipKeyDown);
+    window.removeEventListener("keydown", this.keyDown);
     this.clear();
   }
 }
