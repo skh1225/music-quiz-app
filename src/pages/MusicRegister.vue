@@ -71,7 +71,7 @@ export default {
       if (value===1) {
         this.instruction = 'Add tag and register music.';
       } else if (value===2) {
-        this.instruction = 'The song already exists.';
+        this.instruction = 'This song already exists.';
       } else if (value===3) {
         this.instruction = 'Register Success';
       } else if (value===4) {
