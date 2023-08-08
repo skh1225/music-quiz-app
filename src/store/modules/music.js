@@ -114,12 +114,13 @@ export default {
         if (payload['description']) {
           data.description = payload['description']
         }
-        data.tags = payload['tags']
+        data.title = payload['title'];
+        data.singer = payload['singer'];
+        data.tags = payload['tags'];
         console.log(context.rootGetters['headers'])
         const response = await axios.post(context.getters.registerUrl, data,
           {headers: context.rootGetters['headers']}
         )
-
         console.log(response.data)
         context.commit('setRegisterState', { state : 1 })
       } catch(error) {

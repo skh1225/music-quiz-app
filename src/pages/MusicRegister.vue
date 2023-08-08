@@ -151,10 +151,12 @@ export default {
         }
         try {
           await this.$store.dispatch('music/registerMusic',{
-          tags: [{
-            name: this.tag
-          }],
-          description: this.description,
+            title: this.title,
+            singer: this.singer,
+            tags: [{
+              name: this.tag
+            }],
+            description: this.description,
         })
         } catch(error) {
           this.error = 'Download Fail!';
@@ -177,9 +179,21 @@ export default {
       this.error = null;
       this.instruction = '';
       this.$store.commit('music/clearData');
-    }
+    },
+    skipKeyDown(event) {
+      if ( event.keyCode == 13 && this.windowState!==3 ) {
+        this.submit();
+      }
+      if (event.keyCode == 27) {
+        this.clear();
+      }
+    },
+  },
+  mounted() {
+    window.addEventListener("keydown", this.skipKeyDown);
   },
   beforeUnmount() {
+    window.removeEventListener("keydown", this.skipKeyDown);
     this.clear();
   }
 }

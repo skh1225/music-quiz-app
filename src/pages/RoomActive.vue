@@ -236,7 +236,7 @@ export default {
   beforeUnmount() {
     console.log('before-unmount')
     window.removeEventListener("keydown", this.skipKeyDown);
-    window.removeEventListener('beforeunload', this.leave)
+    window.removeEventListener('beforeunload', this.leave);
     this.unmount = true;
     clearInterval(this.reconnectInterval)
     this.$store.commit('room/clearCron')
