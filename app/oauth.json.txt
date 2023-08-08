@@ -1,0 +1,2 @@
+## ytmusicapi
+## run 'ytmusicapi oauth'

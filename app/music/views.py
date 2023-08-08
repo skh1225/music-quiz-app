@@ -165,7 +165,7 @@ class MusicViewSet(viewsets.ModelViewSet):
         if not query:
             return Response({'detail': 'title_singer param is required'}, status=status.HTTP_400_BAD_REQUEST)
         yt = ytmusicapi.YTMusic('/app/oauth.json', language='ko')
-        similarity = 0
+        similarity = -1
         music_infos = yt.search(query, filter='songs')[:2]
         for music_info in music_infos:
             title = music_info['title']
