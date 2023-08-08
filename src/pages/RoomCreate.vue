@@ -68,7 +68,7 @@ export default {
           mode: 'create',
         }
         if (this.tagsString) {
-          payload.tags = this.tagsString
+          payload.tags = this.tagsString;
         }
         await this.$store.dispatch('room/accessRoom', payload)
       } catch(error) {
