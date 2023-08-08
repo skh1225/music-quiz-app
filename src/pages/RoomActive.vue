@@ -31,7 +31,7 @@
       <button @click="skip">Skip</button>
     </div>
   </section>
-  <div v-else>
+  <div class="spinner-box" v-else>
     <base-spinner></base-spinner>
   </div>
 </template>
@@ -359,5 +359,8 @@ ul {
   padding-left: 10px;
 }
 
-
+.spinner-box {
+  width: 100%;
+  height: 640px;
+}
 </style>
