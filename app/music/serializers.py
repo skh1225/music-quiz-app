@@ -28,44 +28,6 @@ class SingerSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 
-class MusicAudioSerializer(serializers.ModelSerializer):
-    """Serializer for uploading images to recipes."""
-    tags = TagSerializer(many=True, required=False)
-    class Meta:
-        model = Music
-        fields = ['id', 'audio', 'released_year', 'tags']
-        read_only_fields = ['id']
-
-    def _get_or_create_tags(self, tags, music):
-        """Handle getting or creating tags as needed."""
-        for tag in tags:
-            tag_obj, created = Tag.objects.get_or_create(
-                **tag,
-            )
-            music.tags.add(tag_obj)
-
-    def update(self, instance, validated_data):
-        """Update recipe."""
-        tags = validated_data.pop('tags', None)
-        if tags is not None:
-            instance.tags.clear()
-            self._get_or_create_tags(tags, instance)
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-
-        instance.save()
-        return instance
-
-
-class MusicDescriptionSerializer(serializers.ModelSerializer):
-    """Serializer for uploading images to recipes."""
-    class Meta:
-        model = Music
-        fields = ['description']
-        extra_kwargs = {'description': {'required': 'True'}}
-
-
 class MusicSerializer(serializers.ModelSerializer):
     """Serializer for music."""
     tags = TagSerializer(many=True, required=False)
@@ -73,7 +35,8 @@ class MusicSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Music
-        fields = ['id', 'title', 'singers', 'tags', 'running_time', 'released_year', 'description', 'image', 'audio']
+        fields = ['id', 'title', 'singers', 'tags', 'running_time', 'released_year',
+                  'description', 'image', 'audio']
 
     def _get_or_create_tags(self, tags, music):
         """Handle getting or creating tags as needed."""
@@ -120,6 +83,13 @@ class MusicSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+class MusicPatchSerializer(MusicSerializer):
+    """Serializer for recipe detail view."""
+
+    class Meta(MusicSerializer.Meta):
+        fields = ['id', 'title', 'singers', 'tags', 'released_year',
+                  'description', 'image']
+        read_only_fields = ['id']
 
 class RoomSerializer(serializers.ModelSerializer):
     """Serializer for Room."""
