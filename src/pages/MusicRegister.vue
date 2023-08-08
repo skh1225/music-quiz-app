@@ -45,7 +45,7 @@
           </li>
         </ul>
       </div>
-      <base-button v-if="windowState!==2 || windowState!==3">{{ formButtonName }}</base-button>
+      <base-button v-if="windowState!==2 && windowState!==3">{{ formButtonName }}</base-button>
       <base-button type="button" @click="clear">Clear</base-button>
     </form>
   </section>
