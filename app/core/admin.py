@@ -45,7 +45,14 @@ class UserAdmin(BaseUserAdmin):
 
 class MusicAdmin(admin.ModelAdmin):
     search_fields = ['title', 'released_year', 'tags__name']
+    list_display = ['title', 'audio', 'tag_list']
+    list_per_page = 50
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('tags')
+
+    def tag_list(self, obj):
+        return u", ".join(o.name for o in obj.tags.all())
 
 
 admin.site.register(models.User, UserAdmin)
