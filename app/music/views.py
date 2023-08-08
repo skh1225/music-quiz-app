@@ -111,6 +111,8 @@ class MusicViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """Create music. (audio field is not required. It's automatically created)"""
+        if not self.request.user.is_staff:
+            return Response({'detail': 'only staff can register music.'}, status=status.HTTP_401_UNAUTHORIZED)
         url = 'https://www.youtube.com/watch?v=' + request.data['id']
 
         with tempfile.TemporaryDirectory(dir='/vol') as tempdirname:
@@ -161,6 +163,8 @@ class MusicViewSet(viewsets.ModelViewSet):
     @action(methods=['GET'], detail=False,  url_path='search_music')
     def search_music(self, request):
         """Search music"""
+        if not self.request.user.is_staff:
+            return Response({'detail': 'only staff can search music.'}, status=status.HTTP_401_UNAUTHORIZED)
         query = self.request.query_params.get('title_singer')
         if not query:
             return Response({'detail': 'title_singer param is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -340,6 +344,8 @@ class RoomViewSet(viewsets.ModelViewSet):
         return self.serializer_class
 
     def create(self, request, *args, **kwargs):
+        if not self.request.user.is_staff:
+            return Response({'detail': 'only staff can create room.'}, status=status.HTTP_401_UNAUTHORIZED)
         music_queryset = Music.objects.all()
         if 'music_length' not in request.data:
             request.data['music_length'] = 50
