@@ -234,6 +234,7 @@ li {
   background-color: rgba(255,255,255,0.1);
   border: none;
   color: white;
+  white-space: nowrap;
   height: inherit;
   width: inherit;
   border-radius: 10px;
