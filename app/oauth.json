@@ -1,9 +1,0 @@
-{
- "access_token": "ya29.a0AfB_byCqH-Yol8zijPuBaUmnGEHSo5QXi2SXvP3Qv52g6P02BJxrmjXQtQQp2p11RWfk-OHCiA8autEbMxfjEZ0hjngWQplx9DzQ79PQ195AAnLrpu3veUSDB-Ni7EhrbcO5hW-m38XF2rvib1S4ADurEmyiugSyXX2mNZsUwGQaCgYKAZASARESFQHsvYlsv3reSqx8ZdToPrvdr___qA0178",
- "expires_in": 64885,
- "refresh_token": "1//0ebdwrzLE0hF9CgYIARAAGA4SNwF-L9IrgvF3vrEyHGVs3pjAQ9RnbhU8QPCfmtjjTuDjMS05Akqy6uVRAnLDjahjLWhmVBcTGNQ",
- "scope": "https://www.googleapis.com/auth/youtube",
- "token_type": "Bearer",
- "expires_at": 1691539517,
- "filepath": "/app/oauth.json"
-}
