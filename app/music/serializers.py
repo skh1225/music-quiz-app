@@ -27,13 +27,6 @@ class SingerSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
         read_only_fields = ['id']
 
-class MusicImageSerializer(serializers.ModelSerializer):
-    """Serializer for uploading images to recipes."""
-
-    class Meta:
-        model = Music
-        fields = ['id', 'image_file']
-        read_only_fields = ['id']
 
 class MusicSerializer(serializers.ModelSerializer):
     """Serializer for music."""

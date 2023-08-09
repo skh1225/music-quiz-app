@@ -109,8 +109,6 @@ class MusicViewSet(viewsets.ModelViewSet):
         """Return the serializer class for request."""
         if self.action == 'partial_update':
             return serializers.MusicPatchSerializer
-        elif self.action == 'upload_image':
-            return serializers.MusicImageSerializer
 
         return self.serializer_class
 
@@ -143,6 +141,7 @@ class MusicViewSet(viewsets.ModelViewSet):
             request.data.__setitem__('audio', File(temp_file))
         if 'image' in request.data and request.data['image'].rfind('=') > -1:
             request.data['image'] = request.data['image'][:request.data['image'].rfind('=')]
+
         if 'release_year' not in request.data or not request.data['released_year']:
             if info_by_ytdlp['release_year']:
                 request.data['released_year'] = info_by_ytdlp['release_year']
@@ -155,11 +154,16 @@ class MusicViewSet(viewsets.ModelViewSet):
         if 'released_year' in request.data:
             request.data['tags'].append({ 'name': str(request.data['released_year'])[:3]+'0년대' })
 
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        image_file = requests.get(request.data['image']+'=w400-h400-s-l90-rj')
+        filename = request.data['id']+'.jpg'
+        with tempfile.TemporaryFile('w+b') as img_file:
+            img_file.write(image_file.content)
+            request.data.__setitem__('image_file', File(img_file, name=filename))
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         """Create a new music."""
@@ -212,23 +216,6 @@ class MusicViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(search_result)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(methods=['POST'], detail=True, url_path='upload-image')
-    def upload_image(self, request, pk=None):
-        """Upload an image to recipe."""
-        music = Music.objects.all().get(id=pk)
-        print(music.id)
-        image_file = requests.get(music.image+'=w400-h400-s-l90-rj')
-        filename = music.id+music.title+'.jpg'
-        with tempfile.TemporaryFile('w+b') as img_file:
-            img_file.write(image_file.content)
-            request.data.__setitem__('image_file', File(img_file, name=filename))
-            print(request.data)
-            serializer = self.get_serializer(music, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema_view(
