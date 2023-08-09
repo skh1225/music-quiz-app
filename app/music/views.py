@@ -218,7 +218,7 @@ class MusicViewSet(viewsets.ModelViewSet):
         """Upload an image to recipe."""
         music = Music.objects.all().get(id=pk)
         print(music.id)
-        image_file = requests.get(music.image)
+        image_file = requests.get(music.image+'=w400-h400-s-l90-rj')
         filename = music.id+music.title+'.jpg'
         with tempfile.TemporaryFile('w+b') as img_file:
             img_file.write(image_file.content)
