@@ -27,6 +27,13 @@ class SingerSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
         read_only_fields = ['id']
 
+class MusicImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images to recipes."""
+
+    class Meta:
+        model = Music
+        fields = ['id', 'image_file']
+        read_only_fields = ['id']
 
 class MusicSerializer(serializers.ModelSerializer):
     """Serializer for music."""
@@ -36,7 +43,7 @@ class MusicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Music
         fields = ['id', 'title', 'singers', 'tags', 'running_time', 'released_year',
-                  'description', 'image', 'audio']
+                  'description', 'image', 'audio', 'image_file']
 
     def _get_or_create_tags(self, tags, music):
         """Handle getting or creating tags as needed."""

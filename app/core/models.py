@@ -23,6 +23,12 @@ def music_audio_file_path(instance, filename):
 
     return os.path.join('uploads', 'audio', filename)
 
+def music_image_file_path(instance, filename):
+    """Generate file path for new recipe audio."""
+    filename = os.path.split(filename)[1]
+
+    return os.path.join('uploads', 'image', filename)
+
 
 class UserManager(BaseUserManager):
     """Manager for users."""
@@ -92,6 +98,7 @@ class Music(models.Model):
     released_year = models.IntegerField(null=True, blank=True)
     description = models.CharField(max_length=255, blank=True)
     image = models.URLField(max_length=255, null=True, blank=True)
+    image_file = models.FileField(null=True, upload_to=music_image_file_path)
     audio = models.FileField(null=True, upload_to=music_audio_file_path)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -103,6 +110,8 @@ class Music(models.Model):
     def delete(self, *args, **kargs):
         if self.audio:
             os.remove(os.path.join(settings.MEDIA_ROOT, self.audio.path))
+        if self.image_file:
+            os.remove(os.path.join(settings.MEDIA_ROOT, self.image_file.path))
         super(Music, self).delete(*args, **kargs)
 
 

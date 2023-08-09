@@ -1,7 +1,9 @@
 """
 Views for the music APIs
 """
+import os
 import tempfile
+import requests
 import yt_dlp
 import re
 import ytmusicapi
@@ -25,6 +27,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from django.core.files import File
+from django.core.files.images import ImageFile
 
 from core.models import (
     Music,
@@ -106,6 +109,8 @@ class MusicViewSet(viewsets.ModelViewSet):
         """Return the serializer class for request."""
         if self.action == 'partial_update':
             return serializers.MusicPatchSerializer
+        elif self.action == 'upload_image':
+            return serializers.MusicImageSerializer
 
         return self.serializer_class
 
@@ -207,6 +212,23 @@ class MusicViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(search_result)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['POST'], detail=True, url_path='upload-image')
+    def upload_image(self, request, pk=None):
+        """Upload an image to recipe."""
+        music = Music.objects.all().get(id=pk)
+        print(music.id)
+        image_file = requests.get(music.image)
+        filename = music.id+music.title+'.jpg'
+        with tempfile.TemporaryFile('w+b') as img_file:
+            img_file.write(image_file.content)
+            request.data.__setitem__('image_file', File(img_file, name=filename))
+            print(request.data)
+            serializer = self.get_serializer(music, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema_view(
