@@ -1,17 +1,16 @@
-# 프로젝트 이름
+# 노래맞추기
 
 <p align="center">
   <br>
-  <img src="./images/common/logo-sample.jpeg">
+  <img src="./images/home.png">
   <br>
 </p>
 
-목차
 
 ## 프로젝트 소개
 
 <p align="justify">
-프로젝트 개요/동기
+프로젝트 구조
 </p>
 
 <p align="center">
@@ -20,12 +19,9 @@ GIF Images
 
 <br>
 
-## 기술 스택
-
-| JavaScript | TypeScript |  React   |  Node   |
-| :--------: | :--------: | :------: | :-----: |
-|   ![js]    |   ![ts]    | ![react] | ![node] |
-
+## 프로젝트 구조
+<br>
+  <img src="./images/play.png">
 <br>
 
 ## 구현 기능
@@ -38,23 +34,9 @@ GIF Images
 
 ### 기능 4
 
-<br>
-
-## 배운 점 & 아쉬운 점
-
-<p align="justify">
-
-</p>
-
-<br>
-
 ## 라이센스
 
 MIT &copy; [NoHack](mailto:lbjp114@gmail.com)
 
 <!-- Stack Icon Refernces -->
 
-[js]: /images/stack/javascript.svg
-[ts]: /images/stack/typescript.svg
-[react]: /images/stack/react.svg
-[node]: /images/stack/node.svg
