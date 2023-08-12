@@ -40,6 +40,11 @@
   <img src="./image/register_music.png" width="50%" height="50%">
   <br>
 </p>
+<p align="center">
+  <br>
+  <img src="./image/register_music1.png" width="50%" height="50%">
+  <br>
+</p>
 
 - 등록하기를 원하는 노래 제목을 입력하게 되면 Youtubemusic 상단의 검색 결과중 단어의 유사도가 가장 높은 것을 알려줍니다.
 - 검색 결과의 thumbnail을 클릭하면 해당 노래의 유튜브 링크로 연결됩니다.
