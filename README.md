@@ -87,7 +87,7 @@
 git clone https://github.com/skh1225/music-quiz-app.git
 ```
 
-### 2. 환경변수 설정
+### 2. music-quiz-vue 환경변수 설정
 - `music-quiz-vue/.env` 의 주소를 변경
   - VUE_APP_API_URL = <URL>
   - 배포 환경이라면 public dns, 로컬환경이라면 localhost:8000
@@ -99,8 +99,17 @@ npm install
 npm run build
 ```
 - music-quiz-vue에 생성된 dist 디렉토리를 `music-quiz-api/proxy` 에 복사
-- 배포 환경이라면 
 
+### 4. music-quiz-api 변수 설정
+- music-quiz-api 폴더의 .env 파일의 `DJANGO_ALLOWED_HOSTS`의 값을 `VUE_APP_API_URL`와 동일한 값으로 변경
+- `DJANGO_SECRET_KEY` 값을 아무 값으로 변경 ex) adslkfjak23sjd4flk23ajs1dkfajdkflj
+- google api를 사용하기위해 oauth.json 생성하고 music-quiz-api/app 에 저장 (<a href='https://ytmusicapi.readthedocs.io/en/stable/setup/oauth.html'>참고</a>) 
+
+### 5. docker compose
+```
+docker-compose up ## 로컬환경
+docker-compose -f docker-compose-deploy.yml up ## 배포 환경
+```
 
 ## 라이센스
 
