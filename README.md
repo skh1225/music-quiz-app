@@ -37,12 +37,10 @@
 ### 1. 원하는 노래 등록
 <p align="center">
   <br>
-  <img src="./image/register_music.png" width="50%" height="50%">
-  <br>
-</p>
-<p align="center">
-  <br>
   <img src="./image/register_music1.png" width="50%" height="50%">
+  <br>
+  <br>
+  <img src="./image/register_music.png" width="50%" height="50%">
   <br>
 </p>
 
